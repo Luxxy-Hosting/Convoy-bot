@@ -102,7 +102,17 @@ module.exports = async (client, message, args) => {
 
         const row2 = new Discord.ActionRowBuilder()
         .addComponents([serverButton])
-        
+        function convertbytes(bytes) {
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            if (bytes == 0) {
+                return "n/a";
+            }
+            var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            if (i == 0) {
+                return bytes + " " + sizes[i];
+            }
+            return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+        }
         msg.edit({
             content: null,
             embeds:[
@@ -111,11 +121,17 @@ module.exports = async (client, message, args) => {
                 .setTitle(`${success} Server Created Successfully`)
                 .setDescription(`
                 > **Status:** \`${response.statusText}\`
-                > **User ID:** \`${userDB.consoleID}\`
-                > **VPS ID:** \`${response.data.data.uuid}\`
-                > **VPS Name:** \`${srvname ? srvname : args[1]}\`
-                > **VPS Plan:** \`${args[1].toLowerCase()}\`
+                > **Server Name:** \`${response.data.data.name}\`
+                > **Server UUID: ** \`${response.data.data.uuid}\`
+                > **Server Status: ** \`${response.data.data.status}\`
+                > **Backend VMID: ** \`${response.data.data.vmid}\`
+                > **CPU Limit: ** \`${response.data.data.limits.cpu}\`
+                > **RAM Limit: ** \`${convertbytes(response.data.data.limits.memory)}\`
+                > **Disk Limit: ** \`${convertbytes(response.data.data.limits.disk)}\`
+                > **Server Link:** [Click Here](${process.env.CONVOY_URL}/server/${response.data.data.uuid})
+
                 `)
+                .setFooter({ text: `Note: The Server IP And Password have been sent to you in dms` })
             ],
             components: [row2]
         }).then( async () => {
